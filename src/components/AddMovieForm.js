@@ -1,70 +1,55 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 
 import axios from 'axios';
 
-const EditMovieForm = (props) => {
-  const navigate = useNavigate();
-  const { id } = useParams();
-  console.log('EMF id:', id)
+const AddMovieForm = (props) => {
+    const navigate = useNavigate();
+    const { id } = useParams();
+    //from App so we w/e we update can also show on the list of movies
+    const { setMovies } = props;
 
-  //from App so we w/e we update can also show on the list of movies
-  const { setMovies } = props;
+    const [movie, setMovie] = useState({
+        title: "",
+        director: "",
+        genre: "",
+        metascore: 0,
+        description: ""
+      });
 
-  const [movie, setMovie] = useState({
-    title: "",
-    director: "",
-    genre: "",
-    metascore: 0,
-    description: ""
-  });
-
-  const handleChange = (e) => {
+    const handleChange = (e) => {
     setMovie({
-      ...movie,
-      [e.target.name]: e.target.value
+        ...movie,
+        [e.target.name]: e.target.value
     });
-  }
+    }
 
-  const handleSubmit = (e) => {
+    const handleSubmit = (e) => {
     e.preventDefault();
-    axios.put(`http://localhost:9000/api/movies/${id}`, movie)
-      .then(res => {
-        // console.log('put update res:', res)
+    //check state
+    // console.log('movie:', movie)
+    axios.post(`http://localhost:9000/api/movies`, movie)
+        .then(res => {
+        console.log('put update res:', res)
         // props from App 
         setMovies(res.data);
-        navigate(`/movies/${movie.id}`);
-      })
-      .catch(err => {
+        navigate(`/movies`);
+        })
+        .catch(err => {
         console.log(err);
-      })
-  }
+        })
+    }
+
 
   const { title, director, genre, metascore, description } = movie;
 
-  
-  useEffect(() => {
-    axios
-      .get(`http://localhost:9000/api/movies/${id}`)
-      .then(res => {
-        console.log('res:', res.data);
-        setMovie(res.data);
-      })
-      .catch(err => {
-        console.log('err:', err)
-      });
-  },[])
-
-
-
-
-  return (
-    <div className="col">
-      <div className="modal-content">
+    return (
+        <div className="add-form">
+           <div className="modal-content">
         <form onSubmit={handleSubmit}>
           <div className="modal-header">
-            <h4 className="modal-title">Editing <strong>{movie.title}</strong></h4>
+            <h4 className="modal-title">Adding <strong>{movie.title}</strong></h4>
           </div>
           <div className="modal-body">
             <div className="form-group">
@@ -91,11 +76,12 @@ const EditMovieForm = (props) => {
           </div>
           <div className="modal-footer">
             <input type="submit" className="btn btn-info" value="Save" />
-            <Link to={`/movies/1`}><input type="button" className="btn btn-default" value="Cancel" /></Link>
+            <Link to={`/movies`}><input type="button" className="btn btn-default" value="Cancel" /></Link>
           </div>
         </form>
       </div>
-    </div>);
+        </div>
+    )
 }
 
-export default EditMovieForm;
+export default AddMovieForm;
